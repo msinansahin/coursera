@@ -115,7 +115,9 @@ public class ScroogeTest {
 		assertTrue(tx1Validator.allUtxoUnique());
 		assertTrue(tx1Validator.sumOfInputsValuesGreaterThanOutputValues());
 		
-		assertEquals(txHandler.handleTxs(new Transaction[] {tx1, tx2}).length, 1);
+		txHandler = new TxHandler(new UTXOPool());
+		assertEquals(new TxHandler(new UTXOPool()).handleTxs(new Transaction[] {prevTransaction}).length, 0);
+		assertEquals(txHandler.handleTxs(new Transaction[] {prevTransaction, tx1, tx2}).length, 1);
 	}
 	
 	@Test
@@ -136,21 +138,22 @@ public class ScroogeTest {
         
         UTXOPool utxoPool = new UTXOPool();
         
-        TxHandler.ScoogeUtility.addOutputsToPool(prevTransaction, utxoPool);
-        TxHandler.ScoogeUtility.addOutputsToPool(tx1, utxoPool);
-        TxHandler.ScoogeUtility.addOutputsToPool(tx2, utxoPool);
         
 		TxHandler txHandler = new TxHandler(utxoPool);
 		
 		TxHandler.TransactionValidator tx1Validator = new TxHandler.TransactionValidator(tx1, utxoPool);
-				
+
+        TxHandler.ScoogeUtility.addOutputsToPool(prevTransaction, utxoPool);
+        TxHandler.ScoogeUtility.addOutputsToPool(tx1, utxoPool);
+        TxHandler.ScoogeUtility.addOutputsToPool(tx2, utxoPool);
 		assertTrue(tx1Validator.allSignaturesOfInputsValid());
 		assertTrue(tx1Validator.allOutputsInPool());
 		assertTrue(tx1Validator.allOutputsValueNonnegative());
 		assertTrue(tx1Validator.allUtxoUnique());
 		assertTrue(tx1Validator.sumOfInputsValuesGreaterThanOutputValues());
 		
-		assertEquals(txHandler.handleTxs(new Transaction[] {tx1, tx2}).length, 2);
+		txHandler = new TxHandler(new UTXOPool());
+		assertEquals(txHandler.handleTxs(new Transaction[] {prevTransaction, tx1, tx2}).length, 2);
 	}
 
 }

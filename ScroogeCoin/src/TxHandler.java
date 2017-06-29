@@ -78,10 +78,11 @@ public class TxHandler {
     	if (utxoPool == null) {
     		utxoPool = new UTXOPool();
     	}
-    	for (Transaction tx : result) {
+    	for (Transaction tx : possibleTxs) {
     		ScoogeUtility.addOutputsToPool(tx, utxoPool);
 		}
     	int index = 0;
+    	
     	for (Transaction tx : possibleTxs) {
     		UTXO utxo = new UTXO(tx.getHash(), index);
     		logger.info(String.format("Validating :: %s", ScoogeUtility.toString(tx)));
@@ -89,7 +90,7 @@ public class TxHandler {
 				result.add(tx);
 				utxoPool.addUTXO(utxo, tx.getOutput(index));
 	    		logger.info(String.format("Validated :: %s", ScoogeUtility.toString(tx)));
-			} else {
+			} else if (tx.getInputs() != null && tx.getInputs().size() != 0) {
 				utxoPool.removeUTXO(utxo);
 	    		logger.warning(String.format("Not Validated :: %s", ScoogeUtility.toString(tx)));
 			}
@@ -206,9 +207,6 @@ public class TxHandler {
     	public boolean sumOfInputsValuesGreaterThanOutputValues() {
     		double outputValues = 0.0,
     				inputValues = 0.0;
-    		if (tx.getInputs() == null)  {
-    			return false;
-    		}
     		for (Transaction.Input in: tx.getInputs()) {
     			Transaction.Output output = utxo_pool.getTxOutput(new UTXO(in.prevTxHash, in.outputIndex));
     			if (output == null) {
